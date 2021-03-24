@@ -2,26 +2,28 @@
 
 [![image][]][1]
 
-[![image][2]][3]
 
-Large-scale data processing and inferencing for machine learning.
+Library to design fast and lightweight computation graphs for Python with aim to provide large-scale data processing and inferencing engine for machine learning.
 
 ## Features
 
-Expresive library to design fast executable graphs for all stages of
-machine learning process:
+Main aim is to provide expresive library to design fast and lightweight computation graphs for Python.
 
-> 1.  **Data exploration phase:** Build reproducible on-the-fly data
->     exploration and processing graphs with full parallelism support
-> 2.  **Training phase:** Use processing graphs as data generators.
-> 3.  **Inference phase:** Deploy processing graphs to production
->     environments for efficient and fast inferences with support for
->     monitoring of model degradation.
+It's focus is on all phases of machine learning process, including:
+
+1. **Data exploration phase:**
+    Build reproducible on-the-fly data exploration through computation graphs with full parallelism support.
+
+2. **Continous training phase:** 
+    Use computation graphs as data generators.
+
+3. **Inference phase:** 
+    Deploy computation graphs to production environments for efficient and fast inferences with support for monitoring of model degradation.
 
 ## Getting started
 
 ```python
-from datagears import Depends
+from datagears import Depends, Network
 
 def add(a, b: int) -> int:  
     return a + b
@@ -32,7 +34,7 @@ def reduce(c: int, b: int = Depends(add)) -> int:
 def final_calc(d: int, a: int = Depends(reduce)) -> int:  
     return a + d
 
-my_graph = dg.Network(name="my_network", outputs=[final_calc, reduce]) 
+my_graph = Network(name="my_network", outputs=[final_calc, reduce]) 
 my_graph.plot()
 ```
 
@@ -49,5 +51,3 @@ my_graph.register()
 
   [image]: https://badge.fury.io/py/datagears.png
   [1]: http://badge.fury.io/py/datagears
-  [2]: https://travis-ci.org/jsam/datagears.png?branch=master
-  [3]: https://travis-ci.org/jsam/datagears
