@@ -21,20 +21,22 @@ machine learning process:
 ## Getting started
 
 ```python
+from datagears import Depends
+
 def add(a, b: int) -> int:  
     return a + b
 
-def reduce(b: int = Depends(add), c: int) -> int:  
+def reduce(c: int, b: int = Depends(add)) -> int:  
     return b - c
 
-def final_calc(a: int = Depends(reduce), d: int) -> int:  
+def final_calc(d: int, a: int = Depends(reduce)) -> int:  
     return a + d
 
 my_graph = dg.Network(name="my_network", outputs=[final_calc, reduce]) 
 my_graph.plot()
 ```
 
-We can not run our graph as:
+We can now run our graph as:
 ```python
 my_graph.run(a=5, b=3, c=4, d=6)
 ```
