@@ -2,6 +2,7 @@
 Tests for `datagears` module.
 """
 import pytest
+
 from datagears import datagears
 
 

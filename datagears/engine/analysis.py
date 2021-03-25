@@ -1,5 +1,5 @@
 import inspect
-from typing import Callable, Dict, List, Type
+from typing import Any, Callable, Dict, List, Type
 
 
 class Signature:
@@ -14,11 +14,20 @@ class Signature:
         self._return_type = self._signature.return_annotation
 
     def __repr__(self) -> str:
-        return self.name()
+        """String representation of a function."""
+        return self.name
 
+    @property
     def name(self) -> str:
         """Returns the name of the wrapped object."""
         return self._name
+
+    def annotation(param: inspect.Parameter) -> Type:
+        """Extract annotation from a parameter."""
+        if param.annotation.__name__ != "_empty":
+            return param.annotation
+
+        return Any
 
     def get_params(self) -> Dict:
         """Get all function input parameters."""

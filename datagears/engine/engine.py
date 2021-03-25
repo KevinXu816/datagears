@@ -1,8 +1,9 @@
-from datagears.engine.network import Gear, Network
-from typing import Union
 from abc import ABC
-from contextlib import contextmanager
 from concurrent.futures import ProcessPoolExecutor
+from contextlib import contextmanager
+from typing import Union
+
+from datagears.engine.network import Gear, Network
 
 
 class RunResult:
@@ -31,15 +32,11 @@ class Engine(ABC):
 
 
 class LocalEngine(Engine):
-
-    def __init__(self, compute: Union[Gear, Network]) -> None:
+    def __init__(self, compute: Union[Gear, Network], max_workers=4) -> None:
         """Local engine constructor."""
+        # TODO: following code will only support ```Network`` type
         self._compute: Union[Gear, Network] = compute
-        self._max_workers: int = 4
-
-    def set_max_workers(self, n: int):
-        """Set max workers."""
-        self._max_workers = n
+        self._max_workers: int = max_workers
 
     @contextmanager
     def _executor(self):

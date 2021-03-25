@@ -1,5 +1,6 @@
 from datagears.engine.network import Depends
 
+
 def add(a, b) -> int:
     return a + b
 

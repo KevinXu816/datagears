@@ -1,10 +1,11 @@
 import inspect
 import types
 
-
-from datagears.engine.network import Depends
 from datagears.engine.analysis import Signature
+from datagears.engine.network import Depends
+
 from . import add, reduce
+
 
 def test_simple_func_analysis():
     """Test function analysis."""
@@ -27,7 +28,7 @@ def test_depends_func_analysis():
     assert sig.get_input_keywords() == ["c", "sum"]
     assert sig.name() == "reduce"
     assert reduce(3, 5) == 2
-    
+
     params = sig.get_params()
     assert list(params.keys()) == ["c", "sum"]
 
