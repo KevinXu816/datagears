@@ -1,9 +1,10 @@
-from typing import Callable, List, Tuple
+import inspect
+from typing import Any, Callable, List, Tuple
 
 from networkx import MultiDiGraph
 from networkx.drawing.nx_pylab import draw_networkx
 
-from datagears.engine.nodes import Gear, InputGear, OutputGear
+from datagears.engine.nodes import Gear, GearOutput, InputGear, OutputGear
 from datagears.engine.plot import NetworkPlot
 
 
@@ -27,7 +28,6 @@ class Network:
 
     def __init__(self, name: str, outputs: List[Callable]) -> None:
         """Network constructor."""
-        self._output_from_nodes = {}
         self._outputting_nodes = outputs
         self._graph = MultiDiGraph()
 
@@ -58,11 +58,20 @@ class Network:
         gear.set_graph(self._graph)
 
         for name, param in gear.get_params().items():
-            param_id = f"{name}:{param.annotation}"
-
             if param.default and isinstance(param.default, Depends):
                 src_gear = param.default.gear
-                self._graph.add_edge(src_gear, gear, name=name, instance=param)
+                gear_output_name = f"{str(src_gear)}_output"
+                src_gear_output = GearOutput(gear_output_name)
+
+                self._graph.add_edge(
+                    src_gear,
+                    src_gear_output,
+                    name="output",
+                    instance=inspect.Parameter(
+                        gear_output_name, inspect.Parameter.KEYWORD_ONLY, annotation=Any
+                    ),
+                )  # TODO: set the output type
+                self._graph.add_edge(src_gear_output, gear, name=name, instance=param)
 
                 self.add_gear(src_gear)
 

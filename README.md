@@ -28,20 +28,38 @@ It's focus is on all phases of machine learning process, including:
 ```python
 from datagears import Depends, Network
 
-def add(a, b: int) -> int:  
+
+def add(a, b) -> int:
     return a + b
 
-def reduce(c: int, b: int = Depends(add)) -> int:  
-    return b - c
 
-def final_calc(d: int, a: int = Depends(reduce)) -> int:  
-    return a + d
+def reduce(c: int, sum: int = Depends(add)) -> int:
+    return sum - c
 
-my_graph = Network(name="my_network", outputs=[final_calc, reduce]) 
-my_graph.plot()
+
+def my_out(reduced: int = Depends(reduce)) -> float:
+    return reduced / 2
+
+
+my_graph = Network(name="mynet", outputs=[my_out]) 
+my_graph.plot.view()
 ```
 
-We can now run our graph as:
+
+Which should produce following computational graph:
+
+
+[![image][2]][1]
+
+
+To inspect the `input_shape` we can check with:
+
+```python
+network.input_shape
+> {'c': int, 'a': typing.Any, 'b': typing.Any}
+```
+
+To execute our newly composed computation, we can execute it with given parameters:
 ```python
 my_graph.run(a=5, b=3, c=4, d=6)
 ```
@@ -54,3 +72,4 @@ my_graph.register()
 
   [image]: https://badge.fury.io/py/datagears.png
   [1]: http://badge.fury.io/py/datagears
+  [2]: ./out.png

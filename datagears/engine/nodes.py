@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable
 
 from datagears.engine.analysis import Signature
 
@@ -43,19 +43,38 @@ class InputGear(Gear):
 
 
 class OutputGear(Gear):
+    """Exit node of a graph."""
+
     pass
 
 
-class Data:
-    """Abstract class for a wrapper for any input or output data."""
+class GearOutput:
+    """Output of a gear after execution."""
 
-    def __init__(self, **kwargs) -> None:
-        pass
+    def __init__(self, name: str, data: Any = None) -> None:
+        """Gear output constructor."""
+        self._name = name
+        self._data = data
 
-    def get_data(self) -> dict:
+    def __repr__(self) -> str:
+        """String representation."""
+        return self.name
+
+    @property
+    def data(self) -> Any:
         """Returns wrapped data."""
-        raise NotImplementedError
+        return self._data
+
+    @property
+    def is_empty(self) -> bool:
+        """Check if the node is empty."""
+        return self._data is None
+
+    @property
+    def name(self) -> str:
+        """Node name."""
+        return self._name
 
     def set_data(self, data) -> None:
         """Wraps given data."""
-        raise NotImplementedError
+        self._data = data

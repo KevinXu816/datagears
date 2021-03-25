@@ -1,5 +1,6 @@
 import inspect
 import types
+from typing import Callable
 
 from datagears.engine.analysis import Signature
 from datagears.engine.network import Depends
@@ -26,7 +27,7 @@ def test_depends_func_analysis():
     sig = Signature(reduce)
 
     assert sig.get_input_keywords() == ["c", "sum"]
-    assert sig.name() == "reduce"
+    assert sig.name == "reduce"
     assert reduce(3, 5) == 2
 
     params = sig.get_params()
@@ -38,14 +39,11 @@ def test_depends_func_analysis():
         params["sum"]
     )
     assert type(params["sum"].default) == Depends
-    assert type(params["sum"].default._functions) == tuple
-
-    assert len(params["sum"].default._functions) == 1
-    assert type(params["sum"].default._functions[0]) == types.FunctionType
+    assert type(params["sum"].default._func) == types.FunctionType
 
     assert sig.get_output_type() == int
 
-    sig = Signature(params["sum"].default._functions[0])
+    sig = Signature(params["sum"].default._func)
     assert sig.get_input_keywords() == ["a", "b"]
 
     params = sig.get_params()
