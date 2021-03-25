@@ -48,8 +48,9 @@ my_graph.plot.view()
 
 Which should produce following computational graph:
 
-
-[![image][2]][1]
+<p align="center">
+    <img src="out.png" />
+</p>
 
 
 To inspect the `input_shape` we can check with:
@@ -72,4 +73,3 @@ my_graph.register()
 
   [image]: https://badge.fury.io/py/datagears.png
   [1]: http://badge.fury.io/py/datagears
-  [2]: ./out.png
