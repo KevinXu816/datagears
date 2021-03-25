@@ -12,13 +12,16 @@ Main aim is to provide expresive library to design fast and lightweight computat
 It's focus is on all phases of machine learning process, including:
 
 1. **Data exploration phase:**
-    Build reproducible on-the-fly data exploration through computation graphs with full parallelism support.
+      * Build reproducible on-the-fly data exploration through computation graphs 
+      * Benefit from full parallelism support
 
 2. **Continous training phase:** 
-    Use computation graphs as data generators.
+      * Use computation graphs as data generators
+      * Track of hyperparameter tunning or architecture search
 
 3. **Inference phase:** 
-    Deploy computation graphs to production environments for efficient and fast inferences with support for monitoring of model degradation.
+    * Deploy computation graphs to production environments for efficient and fast inferencing pipeline 
+    * Track and monitor model degradations
 
 ## Getting started
 
