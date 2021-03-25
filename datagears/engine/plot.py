@@ -10,7 +10,7 @@ class NetworkPlot:
         """Network plot constructor."""
         import pydot
 
-        from datagears.engine.network import Gear, InputGear, OutputGear
+        from datagears.engine.network import InputGear, OutputGear
 
         self._graph: networkx.DiGraph = graph
 

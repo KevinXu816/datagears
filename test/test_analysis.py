@@ -1,6 +1,5 @@
 import inspect
 import types
-from typing import Callable
 
 from datagears.engine.analysis import Signature
 from datagears.engine.network import Depends
