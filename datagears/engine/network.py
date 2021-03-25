@@ -57,7 +57,7 @@ class Network:
         """Add gear to the DAG."""
         gear.set_graph(self._graph)
 
-        for name, param in gear.get_params().items():
+        for name, param in gear.params.items():
             if param.default and isinstance(param.default, Depends):
                 src_gear = param.default.gear
                 gear_output_name = f"{str(src_gear)}_output"
@@ -79,4 +79,4 @@ class Network:
 
             else:
                 self._graph.add_edge(self._input_gear, gear, name=name, instance=param)
-                self._input_gear.set_shape(gear.get_params())
+                self._input_gear.set_shape(gear.params)

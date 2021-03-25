@@ -27,17 +27,14 @@ class Signature:
         """Get output type."""
         return self._return_type
 
+    @property
+    def params(self) -> Dict:
+        """Get all function input parameters."""
+        return self._params
+
     def annotation(param: inspect.Parameter) -> Type:
         """Extract annotation from a parameter."""
         if param.annotation.__name__ != "_empty":
             return param.annotation
 
         return Any
-
-    def get_params(self) -> Dict:
-        """Get all function input parameters."""
-        return self._params
-
-    def get_input_keywords(self) -> List:
-        """Get all function input keywords."""
-        return sorted(list(self._params.keys()))
