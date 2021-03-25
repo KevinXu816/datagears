@@ -32,10 +32,14 @@ class Engine(ABC):
 
 
 class LocalEngine(Engine):
+    """Local engine executor."""
+
     def __init__(self, compute: Union[Gear, Network], max_workers=4) -> None:
         """Local engine constructor."""
-        # TODO: following code will only support ```Network`` type
-        self._compute: Union[Gear, Network] = compute
+        if isinstance(compute, Gear):
+            compute = Network(compute.name, outputs=[compute])
+
+        self._compute: Network = compute
         self._max_workers: int = max_workers
 
     @contextmanager

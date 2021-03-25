@@ -1,5 +1,5 @@
 from typing import Any, Callable
-
+from dataclasses import dataclass
 from datagears.engine.analysis import Signature
 
 
@@ -48,6 +48,14 @@ class OutputGear(Gear):
     pass
 
 
+@dataclass
+class ComputeStats:
+    """Runtime computation stats for a gear."""
+
+    runtime_ms: int
+    alloc_count: int
+
+
 class GearOutput:
     """Output of a gear after execution."""
 
@@ -55,6 +63,7 @@ class GearOutput:
         """Gear output constructor."""
         self._name = name
         self._data = data
+        self._stats: ComputeStats = None
 
     def __repr__(self) -> str:
         """String representation."""
