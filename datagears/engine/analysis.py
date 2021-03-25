@@ -22,6 +22,11 @@ class Signature:
         """Returns the name of the wrapped object."""
         return self._name
 
+    @property
+    def output_type(self) -> Type:
+        """Get output type."""
+        return self._return_type
+
     def annotation(param: inspect.Parameter) -> Type:
         """Extract annotation from a parameter."""
         if param.annotation.__name__ != "_empty":
@@ -36,7 +41,3 @@ class Signature:
     def get_input_keywords(self) -> List:
         """Get all function input keywords."""
         return sorted(list(self._params.keys()))
-
-    def get_output_type(self) -> Type:
-        """Get output type."""
-        return self._return_type

@@ -18,7 +18,7 @@ def test_simple_func_analysis():
     assert params["a"] == inspect.Parameter("a", 1)
     assert params["b"] == inspect.Parameter("b", 1)
 
-    assert sig.get_output_type() == int
+    assert sig.output_type == int
 
 
 def test_depends_func_analysis():
@@ -40,7 +40,7 @@ def test_depends_func_analysis():
     assert type(params["sum"].default) == Depends
     assert type(params["sum"].default._func) == types.FunctionType
 
-    assert sig.get_output_type() == int
+    assert sig.output_type == int
 
     sig = Signature(params["sum"].default._func)
     assert sig.get_input_keywords() == ["a", "b"]
@@ -50,4 +50,4 @@ def test_depends_func_analysis():
     assert params["a"] == inspect.Parameter("a", 1)
     assert params["b"] == inspect.Parameter("b", 1)
 
-    assert sig.get_output_type() == int
+    assert sig.output_type == int

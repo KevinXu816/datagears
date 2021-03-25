@@ -68,9 +68,11 @@ class Network:
                     src_gear_output,
                     name="output",
                     instance=inspect.Parameter(
-                        gear_output_name, inspect.Parameter.KEYWORD_ONLY, annotation=Any
+                        gear_output_name,
+                        inspect.Parameter.KEYWORD_ONLY,
+                        annotation=src_gear.output_type,
                     ),
-                )  # TODO: set the output type
+                )
                 self._graph.add_edge(src_gear_output, gear, name=name, instance=param)
 
                 self.add_gear(src_gear)

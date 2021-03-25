@@ -9,5 +9,5 @@ def test_network_construction():
 
     assert network.plot
     assert network
-    breakpoint()
+
     assert all([True for n in network.graph.nodes if n])
