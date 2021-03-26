@@ -8,7 +8,6 @@ def test_local_engine():
     """Test local engine."""
     engine = LocalEngine(Network("my-net", outputs=[add]))
 
-    with engine._executor() as executor:
-        future = executor.submit(add, 2, 3)
+    future = engine._executor.submit(add, 2, 3)
 
     assert future

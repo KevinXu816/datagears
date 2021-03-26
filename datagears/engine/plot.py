@@ -1,7 +1,5 @@
 import networkx
 
-from datagears.engine.nodes import GearOutput
-
 
 class NetworkPlot:
     """Network plotting utility."""
@@ -10,46 +8,29 @@ class NetworkPlot:
         """Network plot constructor."""
         import pydot
 
-        from datagears.engine.network import InputGear, OutputGear
-
         self._graph: networkx.DiGraph = graph
 
-        g = pydot.Dot(graph_type="digraph")
+        g = pydot.Dot(graph_type="digraph", rank="same")
 
         for nx_node in self._graph.nodes:
-            shape = "circle"
-
-            if isinstance(nx_node, InputGear):
-                shape = "invhouse"
-
-            if isinstance(nx_node, OutputGear):
-                shape = "house"
-
-            if isinstance(nx_node, GearOutput):
-                shape = "note"
-
-            node = pydot.Node(name=nx_node.name, label=nx_node.name, shape=shape)
+            node = pydot.Node(
+                name=nx_node.name, label=nx_node.name, shape=nx_node.shape
+            )
             g.add_node(node)
 
         for src, dst, param in self._graph.edges(data=True):
-            if not hasattr(param["instance"].annotation, "__name__"):
-                param_type = str(param["instance"].annotation)
-            else:
-                param_type = param["instance"].annotation.__name__
-
-            edge_params = {
-                "name": param["name"],
-                "type": param_type if param_type != "_empty" else "Any",
-            }
-            _label = f"{edge_params['name']}[{edge_params['type']}]"
-
-            edge = pydot.Edge(src=str(src), dst=str(dst), label=str(_label))
-
+            edge = pydot.Edge(src=str(src), dst=str(dst))
             g.add_edge(edge)
 
         self._pydot_graph = g
 
-    def view(self):
+    @property
+    def meta(self):
+        """Return metadata of network plot."""
+        return self._pydot_graph.obj_dict
+
+    @property
+    def show(self):
         """Render pydot for viewing in Jupyter notebook."""
         from IPython.display import Image, display
 

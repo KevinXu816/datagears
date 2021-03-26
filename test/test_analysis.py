@@ -16,7 +16,7 @@ def test_simple_func_analysis():
     params = sig.params
     assert list(params.keys()) == ["a", "b"]
     assert params["a"] == inspect.Parameter("a", 1)
-    assert params["b"] == inspect.Parameter("b", 1)
+    assert params["b"] == inspect.Parameter("b", 1, default=10)
 
     assert sig.output_type == int
 
@@ -45,6 +45,5 @@ def test_depends_func_analysis():
 
     params = sig.params
     assert params["a"] == inspect.Parameter("a", 1)
-    assert params["b"] == inspect.Parameter("b", 1)
-
+    assert params["b"] == inspect.Parameter("b", 1, default=10)
     assert sig.output_type == int

@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Callable, Dict, List, Type
+from typing import Callable, Dict, Type
 
 
 class Signature:
@@ -31,10 +31,3 @@ class Signature:
     def params(self) -> Dict:
         """Get all function input parameters."""
         return self._params
-
-    def annotation(param: inspect.Parameter) -> Type:
-        """Extract annotation from a parameter."""
-        if param.annotation.__name__ != "_empty":
-            return param.annotation
-
-        return Any

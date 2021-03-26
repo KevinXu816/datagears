@@ -1,89 +1,92 @@
-from typing import Any, Callable
 from dataclasses import dataclass
+from typing import Any, Callable, Type
+
 from datagears.engine.analysis import Signature
 
 
 class Gear(Signature):
     """Node representing data transformation."""
 
+    shape = "circle"
+
     def __init__(self, func: Callable, graph=None) -> None:
         """Gear constructor."""
         self._graph = graph
         super().__init__(func)
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        """Execute the given callable with in going nodes as parameters."""
+        fn_params = {p.name: p.value for p in self._graph.predecessors(self)}
+        breakpoint()
+        return self._func(**fn_params)
+
+    @property
+    def input_values(self) -> dict:
+        """Input values for the gear computation."""
+        edges = self._graph.in_edges(self)
+        # TODO: todo
 
     def set_graph(self, graph):
         """Associate gear with a graph."""
         self._graph = graph
 
 
-class InputGear(Gear):
-    """Special graph node denoting inputs."""
+class Data:
+    """Common operations for data nodes."""
 
-    def graph_input():
-        """Placeholder name for the input gear node."""
-        pass
-
-    def __init__(self, graph=None) -> None:
-        """Input gear constructor."""
-        self.input_shape = {}
-
-        super().__init__(InputGear.graph_input, graph=graph)
-
-    def set_shape(self, input_shape: dict):
-        """Set input shape of the input gear."""
-        from datagears.engine.network import Depends
-
-        new_partial = {
-            param_name: Signature.annotation(param)
-            for param_name, param in input_shape.items()
-            if not isinstance(param.default, Depends)
-        }
-
-        self.input_shape = {**self.input_shape, **new_partial}
-
-
-class OutputGear(Gear):
-    """Exit node of a graph."""
-
-    pass
-
-
-@dataclass
-class ComputeStats:
-    """Runtime computation stats for a gear."""
-
-    runtime_ms: int
-    alloc_count: int
-
-
-class GearOutput:
-    """Output of a gear after execution."""
-
-    def __init__(self, name: str, data: Any = None) -> None:
-        """Gear output constructor."""
+    def __init__(self, name: str, value: Any, annotation: Type = Any):
+        """Gear input constructor."""
         self._name = name
-        self._data = data
-        self._stats: ComputeStats = None
+        self._value = value
+        self._annotation = annotation
 
     def __repr__(self) -> str:
         """String representation."""
-        return self.name
+        annotation = self._annotation
 
-    @property
-    def data(self) -> Any:
-        """Returns wrapped data."""
-        return self._data
+        if hasattr(self._annotation, "__name__"):
+            annotation = self._annotation.__name__
 
-    @property
-    def is_empty(self) -> bool:
-        """Check if the node is empty."""
-        return self._data is None
+        return f"{self._name}:{annotation}"
 
     @property
     def name(self) -> str:
         """Node name."""
         return self._name
 
-    def set_data(self, data) -> None:
-        """Wraps given data."""
-        self._data = data
+    @property
+    def value(self) -> Any:
+        """Returns wrapped data."""
+        return self._value
+
+    @property
+    def annotation(self) -> str:
+        """Node annotation."""
+        return self._annotation
+
+    @property
+    def is_empty(self) -> bool:
+        """Check if the node is empty."""
+        return self._value is None
+
+    def set_value(self, value) -> None:
+        """Sets node value."""
+        self._value = value
+
+
+class GearInput(Data):
+    """Input to the gear."""
+
+    shape = "invhouse"
+
+
+class GearOutput(Data):
+    """Output of a gear without additional depedency."""
+
+    shape = "house"
+
+
+class GearInputOutput(Data):
+    """Gear input and output node."""
+
+    shape = "note"
