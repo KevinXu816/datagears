@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, List, Tuple, Union
 
 from networkx import MultiDiGraph
 from networkx.algorithms.dag import descendants
@@ -30,7 +30,7 @@ class Network:
     def __init__(self, name: str, outputs: List[Callable]) -> None:
         """Network constructor."""
         self._outputting_nodes = outputs
-        self._graph = MultiDiGraph()
+        self._graph: MultiDiGraph = MultiDiGraph(name=name)
 
         for output in self._outputting_nodes:
             gear = Gear(output, graph=self._graph)
@@ -93,17 +93,26 @@ class Network:
             for node in self._graph.nodes
             if isinstance(node, GearInputOutput) or isinstance(node, GearOutput)
         ]
-        return {out.name: out.value for out in outputs}
+        return {str(out): out.value for out in outputs}
 
     def set_input(self, input_data: dict):
         """Set input data for the graph computation."""
         if input_data.keys() != self.input_shape.keys():
             raise ValueError("input data is wrong format - check `network.input_shape`")
+
         inputs = {
             node.name: node for node in self._graph.nodes if isinstance(node, GearInput)
         }
+
         for name, value in input_data.items():
-            inputs[name] = value
+            inputs[name].set_value(value)
+
+    def reset_outputs(self):
+        """Reset all data nodes."""
+        for r in self.roots:
+            for src, dst in bfs_edges(self._graph, r):
+                if isinstance(dst, GearOutput) or isinstance(dst, GearInputOutput):
+                    dst.set_value(None)
 
     def compute_next(self) -> List:
         """Returns next nodes for execution."""
@@ -131,31 +140,38 @@ class Network:
         value = param.default if param.default != param.empty else None
         annotation = param.annotation if param.annotation != param.empty else Any
 
-        gear_input = GearInput(param.name, value, annotation=annotation)
+        gear_input = GearInput(
+            param.name, value, annotation=annotation, graph=self._graph
+        )
         self._graph.add_edge(gear_input, dst)
 
-    def _attach_output(self, src_gear: Gear, graph_output: bool = False) -> GearOutput:
+    def _attach_output(
+        self, src_gear: Gear, name: str = None, graph_output: bool = False
+    ) -> Union[GearOutput, GearInputOutput]:
         """Attach output to the gear."""
-        gear_output_name = f"{str(src_gear)}_output"
+        if not name:
+            name = f"{str(src_gear)}"
 
         if graph_output:
-            src_gear_output = GearOutput(gear_output_name, None, src_gear.output_type)
+            src_gear_output = GearOutput(
+                name, None, src_gear.output_type, graph=self._graph
+            )
         else:
             src_gear_output = GearInputOutput(
-                gear_output_name, None, src_gear.output_type
+                name, None, src_gear.output_type, graph=self._graph
             )
 
         self._graph.add_edge(src_gear, src_gear_output)
         return src_gear_output
 
     def _add_gear(self, gear: Gear):
-        """Add gear to the DAG."""
+        """Add gear to the graph."""
         gear.set_graph(self._graph)
 
         for name, param in gear.params.items():
             if param.default and isinstance(param.default, Depends):
                 src_gear = param.default.gear
-                src_gear_output = self._attach_output(src_gear)
+                src_gear_output = self._attach_output(src_gear, name=name)
                 self._graph.add_edge(src_gear_output, gear)
                 self._add_gear(src_gear)
             else:

@@ -10,7 +10,7 @@ def reduce(c: int, sum: int = Depends(add)) -> int:
 
 
 def add_one() -> int:
-    return 5
+    return 1
 
 
 def my_out(reduced: int = Depends(reduce), add_one: int = Depends(add_one)) -> float:

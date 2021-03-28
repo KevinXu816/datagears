@@ -13,10 +13,6 @@ class Signature:
         self._params = dict(self._signature.parameters)
         self._return_type = self._signature.return_annotation
 
-    def __repr__(self) -> str:
-        """String representation of a function."""
-        return self.name
-
     @property
     def name(self) -> str:
         """Returns the name of the wrapped object."""

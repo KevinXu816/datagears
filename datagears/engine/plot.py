@@ -14,12 +14,12 @@ class NetworkPlot:
 
         for nx_node in self._graph.nodes:
             node = pydot.Node(
-                name=nx_node.name, label=nx_node.name, shape=nx_node.shape
+                name=nx_node.name_uniq, label=str(nx_node), shape=nx_node.shape
             )
             g.add_node(node)
 
         for src, dst, param in self._graph.edges(data=True):
-            edge = pydot.Edge(src=str(src), dst=str(dst))
+            edge = pydot.Edge(src=src.name_uniq, dst=dst.name_uniq)
             g.add_edge(edge)
 
         self._pydot_graph = g
