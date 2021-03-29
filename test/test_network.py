@@ -20,11 +20,11 @@ def test_network_set_input():
     network = Network("my-network", outputs=[my_out])
 
     with pytest.raises(ValueError):
-        network.set_input({})
+        network._set_input({})
 
     default_values = {"a": None, "b": 10, "c": None}
     assert network.inputs == default_values
 
     new_values = {"a": 1, "b": 2, "c": 3}
-    network.set_input(new_values)
+    network._set_input(new_values)
     assert network.inputs == new_values

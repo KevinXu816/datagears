@@ -1,12 +1,12 @@
+from datagears.engine.api import NetworkAPI, NetworkPlotAPI, NetworkRunAPI
 import inspect
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from networkx import MultiDiGraph
 from networkx.algorithms.dag import descendants
 from networkx.algorithms.traversal.breadth_first_search import bfs_edges
 
 from datagears.engine.nodes import Gear, GearInput, GearInputOutput, GearOutput
-from datagears.engine.plot import NetworkPlot
 
 
 class Depends:
@@ -24,18 +24,12 @@ class Depends:
         return Gear(self._func)
 
 
-class Network:
-    """Representation of a DAG which contains all processing data."""
+class NetworkPropertyMixin(NetworkAPI):
+    """Network property mixin."""
 
-    def __init__(self, name: str, outputs: List[Callable]) -> None:
-        """Network constructor."""
-        self._outputting_nodes = outputs
-        self._graph: MultiDiGraph = MultiDiGraph(name=name)
-
-        for output in self._outputting_nodes:
-            gear = Gear(output, graph=self._graph)
-            self._attach_output(gear, graph_output=True)
-            self._add_gear(gear)
+    def __init__(self, graph: MultiDiGraph) -> None:
+        """Network property mixin."""
+        self._graph = graph
 
     @property
     def graph(self):
@@ -43,8 +37,10 @@ class Network:
         return self._graph
 
     @property
-    def plot(self) -> NetworkPlot:
+    def plot(self) -> NetworkPlotAPI:
         """Plot the network."""
+        from datagears.engine.plot import NetworkPlot
+
         return NetworkPlot(self._graph)
 
     @property
@@ -95,7 +91,23 @@ class Network:
         ]
         return {str(out): out.value for out in outputs}
 
-    def set_input(self, input_data: dict):
+
+class Network(NetworkPropertyMixin):
+    """Representation of a DAG which contains all processing data."""
+
+    def __init__(self, name: str, outputs: Optional[List[Callable]] = None) -> None:
+        """Network constructor."""
+        self._outputting_nodes = outputs
+        self._graph: MultiDiGraph = MultiDiGraph(name=name)
+
+        for output in self._outputting_nodes:
+            gear = Gear(output, graph=self._graph)
+            self._attach_output(gear, graph_output=True)
+            self._add_gear(gear)
+
+        super().__init__(self._graph)
+
+    def _set_input(self, input_data: dict):
         """Set input data for the graph computation."""
         if input_data.keys() != self.input_shape.keys():
             raise ValueError("input data is wrong format - check `network.input_shape`")
@@ -107,14 +119,7 @@ class Network:
         for name, value in input_data.items():
             inputs[name].set_value(value)
 
-    def reset_outputs(self):
-        """Reset all data nodes."""
-        for r in self.roots:
-            for src, dst in bfs_edges(self._graph, r):
-                if isinstance(dst, GearOutput) or isinstance(dst, GearInputOutput):
-                    dst.set_value(None)
-
-    def compute_next(self) -> List:
+    def _compute_next(self) -> List:
         """Returns next nodes for execution."""
         # NOTE: Find all nodes of type `GearOutput`.
         outputs = {
@@ -176,3 +181,18 @@ class Network:
                 self._add_gear(src_gear)
             else:
                 self._attach_input(param, gear)
+
+    def copy(self) -> "Network":
+        """Create a copy of an `Network` instance."""
+        new_network = Network(self.name)
+        new_network._outputting_nodes = self._outputting_nodes
+        new_network._graph = self._graph.copy()
+
+        return new_network
+
+    def run(self, output_all=False, **kwargs) -> NetworkRunAPI:
+        """Run computation."""
+        from datagears.engine.run import NetworkRun
+        from datagears.engine.engine import LocalEngine
+
+        return NetworkRun(self, LocalEngine, **kwargs)

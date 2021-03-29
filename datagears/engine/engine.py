@@ -1,40 +1,14 @@
-from abc import ABC
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import Any, Union
-
-from datagears.engine.network import Gear, Network
+from datagears.engine.api import EngineAPI, NetworkAPI
 
 
-class RunResult:
-    """RunResult instantiated graph with values."""
-
-    pass
-
-
-class Engine(ABC):
-    """Executor which contains low level operations for communication with RedisGears."""
-
-    def __init__(self, compute: Union[Gear, Network]) -> None:
-        raise NotImplementedError
-
-    def prepare(self):
-        """Prepare the given computation for executor."""
-        raise NotImplementedError
-
-    def run(self) -> RunResult:
-        """Runs the computational network and returns the result object."""
-        raise NotImplementedError
-
-    def register():
-        """Registers the computational network with RedisGears."""
-        raise NotImplementedError
-
-
-class LocalEngine(Engine):
+class LocalEngine(EngineAPI):
     """Local engine executor."""
 
-    def __init__(self, compute: Union[Gear, Network], max_workers=4) -> None:
+    def __init__(self, compute: NetworkAPI, max_workers=4) -> None:
         """Local engine constructor."""
+        from datagears.engine.network import Gear, Network
+
         if isinstance(compute, Gear):
             compute = Network(compute.name, outputs=[compute])
 
@@ -49,7 +23,7 @@ class LocalEngine(Engine):
         results = {}
         futures = {}
 
-        for data_node in self._network.compute_next():
+        for data_node in self._network._compute_next():
             predeccesors = list(self._network.graph.predecessors(data_node))
             if len(predeccesors) != 1:
                 raise NotImplementedError(
@@ -75,8 +49,7 @@ class LocalEngine(Engine):
 
     def run(self, output_all=False, **kwargs) -> dict:
         """Runs the computational network and returns the result object."""
-        self._network.reset_outputs()
-        self._network.set_input(kwargs)
+        self._network._set_input(kwargs)
 
         results = {}
         while True:
