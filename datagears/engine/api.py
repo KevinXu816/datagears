@@ -35,8 +35,12 @@ class NetworkAPI(metaclass=abc.ABCMeta):
         """Return all inputs with values of a graph."""
         raise NotImplementedError
 
+    def copy(self) -> "NetworkAPI":
+        """Copy existing network."""
+        raise NotImplementedError
 
-class NetworkRunAPI(metaclass=abc.ABCMeta):
+
+class NetworkRunAPI(NetworkAPI, metaclass=abc.ABCMeta):
     """Abstract class defining network run actions."""
 
     pass

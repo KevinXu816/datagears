@@ -1,11 +1,12 @@
-from datagears.engine.api import NetworkAPI, NetworkPlotAPI, NetworkRunAPI
 import inspect
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Type, Union
 
 from networkx import MultiDiGraph
 from networkx.algorithms.dag import descendants
 from networkx.algorithms.traversal.breadth_first_search import bfs_edges
 
+from datagears.engine.api import (EngineAPI, NetworkAPI, NetworkPlotAPI,
+                                  NetworkRunAPI)
 from datagears.engine.nodes import Gear, GearInput, GearInputOutput, GearOutput
 
 
@@ -92,12 +93,35 @@ class NetworkPropertyMixin(NetworkAPI):
         return {str(out): out.value for out in outputs}
 
 
+class NetworkRun(NetworkRunAPI, NetworkPropertyMixin):
+    def __init__(
+        self,
+        network: NetworkAPI,
+        engine: Type[EngineAPI],
+        config: dict = {},
+        output_all: bool = False,
+        **kwargs,
+    ) -> None:
+        """Network run constructor."""
+        self._network = network
+        self._output_all = output_all
+        self._engine = engine(self._network, **config)
+        self._result = self._engine.run(output_all=output_all, **kwargs)
+
+        super().__init__(self._network.graph)
+
+    @property
+    def result(self):
+        """Return compution result."""
+        return self._result
+
+
 class Network(NetworkPropertyMixin):
     """Representation of a DAG which contains all processing data."""
 
     def __init__(self, name: str, outputs: Optional[List[Callable]] = None) -> None:
         """Network constructor."""
-        self._outputting_nodes = outputs
+        self._outputting_nodes = outputs or []
         self._graph: MultiDiGraph = MultiDiGraph(name=name)
 
         for output in self._outputting_nodes:
@@ -184,15 +208,10 @@ class Network(NetworkPropertyMixin):
 
     def copy(self) -> "Network":
         """Create a copy of an `Network` instance."""
-        new_network = Network(self.name)
-        new_network._outputting_nodes = self._outputting_nodes
-        new_network._graph = self._graph.copy()
-
-        return new_network
+        return Network(self._graph.name, outputs=self._outputting_nodes)
 
     def run(self, output_all=False, **kwargs) -> NetworkRunAPI:
         """Run computation."""
-        from datagears.engine.run import NetworkRun
         from datagears.engine.engine import LocalEngine
 
-        return NetworkRun(self, LocalEngine, **kwargs)
+        return NetworkRun(self.copy(), LocalEngine, output_all=output_all, **kwargs)
